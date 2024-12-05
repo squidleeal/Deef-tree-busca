@@ -1,3 +1,4 @@
+
 def ler_digrafos(arquivo):
     # Abre o arquivo e lê todo o conteúdo
     with open(arquivo, 'r') as f:
