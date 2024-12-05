@@ -1,3 +1,20 @@
+import os
+import networkx as nx
+import matplotlib.pyplot as plt
+
+def plotar_grafo(grafo, grafo_numero):
+    nome_arquivo = f"digrafo_{grafo_numero}"
+    G = nx.DiGraph()
+        
+    for vertice, vizinhos in grafo.items():
+        G.add_node(vertice)  
+        for vizinho in vizinhos:
+            G.add_edge(vertice, vizinho)
+
+    pos = nx.spring_layout(G)
+    nx.draw(G, pos, with_labels=True, node_size=700, node_color='lightblue', font_size=10, font_weight='bold', arrows=True)
+    plt.title(nome_arquivo)
+    plt.show()
 
 def ler_digrafos(arquivo):
     # Abre o arquivo e lê todo o conteúdo
@@ -18,9 +35,10 @@ def ler_digrafos(arquivo):
 
 def painel_selecao(digrafos):
     global digrafo_atual
+    digrafo_atual = None
     while True:
         # Mostra o menu de opções para o usuário
-        opcao = input("\nDigite a Opção Desejada:\n1. Selecionar qual digrafo deseja manipular.\n2. Mostrar Digrafo.\n3. Aplicar Busca em Profundidade.\nOpção: ")
+        opcao = input("\nDigite a Opção Desejada:\n1. Selecionar qual digrafo deseja manipular.\n2. Mostrar Digrafo.\n3. Aplicar Busca em Profundidade.\n4. Plotar Grafo.\nOpção: ")
         if opcao == '1':
             # Seleciona o dígrafo que o usuário quer manipular
             digrafo_atual = digrafos[selecionar_digrafo(digrafos)]
@@ -35,6 +53,8 @@ def painel_selecao(digrafos):
                 dfs(digrafo_atual, raiz)
             else:
                 print("Vértice raiz não encontrado no digrafo.")
+        elif opcao == '4' and digrafo_atual:
+            plotar_grafo(digrafo_atual, digrafos.index(digrafo_atual) + 1)
         else:
             print("Opção inválida ou digrafo não selecionado. Tente novamente.")
 
@@ -78,7 +98,6 @@ def dfs(digrafo, raiz):
 # Tenta carregar os dígrafos do arquivo
 try:
     digrafos = ler_digrafos('digrafos.txt')
-    digrafo_atual = None
     print(f'{len(digrafos)} listas de adjacência carregadas.')
     # Chama a função painel_selecao para iniciar o programa
     painel_selecao(digrafos)
