@@ -1,0 +1,87 @@
+def ler_digrafos(arquivo):
+    # Abre o arquivo e lê todo o conteúdo
+    with open(arquivo, 'r') as f:
+        conteudo = f.read().strip()
+    
+    digrafos = []
+    # Divide o conteúdo em listas de adjacência separadas por linha em branco
+    for lista in conteudo.split('\n\n'):
+        adjacencia = {}
+        # Para cada linha na lista, divide o vértice e seus adjacentes
+        for linha in lista.split('\n'):
+            vertice, adj = linha.split('=')
+            adjacencia[vertice.strip()] = [v.strip() for v in adj.strip('<>').split(',') if v.strip()]
+        digrafos.append(adjacencia)
+    
+    return digrafos
+
+def painel_selecao(digrafos):
+    global digrafo_atual
+    while True:
+        # Mostra o menu de opções para o usuário
+        opcao = input("\nDigite a Opção Desejada:\n1. Selecionar qual digrafo deseja manipular.\n2. Mostrar Digrafo.\n3. Aplicar Busca em Profundidade.\nOpção: ")
+        if opcao == '1':
+            # Seleciona o dígrafo que o usuário quer manipular
+            digrafo_atual = digrafos[selecionar_digrafo(digrafos)]
+        elif opcao == '2' and digrafo_atual:
+            # Mostra o dígrafo selecionado
+            mostrar_digrafo(digrafo_atual)
+        elif opcao == '3' and digrafo_atual:
+            # Pergunta qual vértice será a raiz da busca
+            raiz = input("Qual será o vértice raiz da busca? ")
+            if raiz in digrafo_atual:
+                # Aplica a busca em profundidade
+                dfs(digrafo_atual, raiz)
+            else:
+                print("Vértice raiz não encontrado no digrafo.")
+        else:
+            print("Opção inválida ou digrafo não selecionado. Tente novamente.")
+
+def selecionar_digrafo(digrafos):
+    n = len(digrafos)
+    while True:
+        try:
+            # Pede ao usuário para selecionar um dígrafo pelo número
+            escolha = int(input(f"Selecione um digrafo de 1 a {n}: "))
+            if 1 <= escolha <= n:
+                return escolha - 1
+        except ValueError:
+            pass
+        print("Entrada inválida. Tente novamente.")
+
+def mostrar_digrafo(digrafo):
+    # Imprime cada vértice e seus adjacentes
+    for vertice, adj in digrafo.items():
+        print(f"{vertice} -> {', '.join(adj)}")
+
+def dfs(digrafo, raiz):
+    visitado, profundidade_entrada, profundidade_saida, tempo = set(), {}, {}, [0]
+    
+    def dfs_visit(v):
+        visitado.add(v)
+        tempo[0] += 1
+        profundidade_entrada[v] = tempo[0]
+        # Visita todos os vizinhos do vértice atual
+        for vizinho in digrafo[v]:
+            if vizinho not in visitado:
+                dfs_visit(vizinho)
+        tempo[0] += 1
+        profundidade_saida[v] = tempo[0]
+    
+    dfs_visit(raiz)
+    # Imprime a árvore de busca em profundidade
+    print("Árvore de busca em profundidade:")
+    for v in visitado:
+        print(f"Vértice: {v}, Entrada: {profundidade_entrada[v]}, Saída: {profundidade_saida[v]}")
+
+# Tenta carregar os dígrafos do arquivo
+try:
+    digrafos = ler_digrafos('digrafos.txt')
+    digrafo_atual = None
+    print(f'{len(digrafos)} listas de adjacência carregadas.')
+    # Chama a função painel_selecao para iniciar o programa
+    painel_selecao(digrafos)
+except FileNotFoundError:
+    print("Erro: O arquivo 'digrafos.txt' não foi encontrado.")
+except Exception as e:
+    print(f"Erro ao ler o arquivo: {e}")
